@@ -1,0 +1,174 @@
+<HTML><HEAD>
+<TITLE>Backtest - Backtest Report</TITLE><STYLE>
+<!--
+BODY { font-family:"Tahoma,Arial,Helvetica,Sans Serif"; font-size:8pt; }
+TD {  font-size:8pt; text-align: right; white-space: nowrap; }
+TH {  font-size:8pt; text-align: left; font-weight: normal; }
+.CH { text-align: right; font-weight:bold; }
+.CHL { text-align: left; font-weight:bold; }
+.BIG { font-size:10pt; font-weight:bold; text-align: center; }
+.TAB { font-size:10pt;  text-align: center; text-color:#CCCCCC; }
+.SELTAB { font-size:10pt; font-weight:bold; text-align: center; text-color:#000000; }
+.good { color:#006600; }
+.bad { color:#880000; }
+.neut { color:#000088; }
+a:active { background-color:#DDDDFF; }
+-->
+</STYLE>
+<SCRIPT>
+var curPart = 0;
+function showPart( i )
+{
+	 document.getElementById("part" + curPart ).style.display = "none";
+	 document.getElementById("part" + i ).style.display = "";
+	 curPart = i;
+}
+</SCRIPT>
+</HEAD>
+<BODY>
+<DIV ALIGN=CENTER><FONT class='TAB'><a href='stats.html'>Statistics</a> | <a href='charts.html'>Charts</a> | <a href='trades.html'>Trades</a> | <a href='formula.html'><FONT class='SELTAB'>Formula</FONT></a> | <a href='settings.html'>Settings</a> | <a href='symbols.html'>Symbols</a> | <a href='montecarlo.html'>Monte Carlo</a></FONT></DIV><br>
+<TABLE CELLSPACING=0 CELLPADDING=2 WIDTH=100%>
+<TR bgcolor="#DDDDDD"><TH COLSPAN=5 CLASS="BIG" >Formula</TH></TR>
+</TABLE><PRE>_SECTION_BEGIN("Price"); 
+SetChartOptions(0,chartShowArrows|chartShowDates); 
+_N(Title = StrFormat("{{NAME}} - {{INTERVAL}} {{DATE}} Open %g, Hi %g, Lo %g, Close %g (%.1f%%) {{VALUES}}", O, H, L, C, SelectedValue( ROC( C, 1 ) ) )); 
+Plot( C, "Close", ParamColor("Color", colorDefault ), styleNoTitle | ParamStyle("Style") | GetPriceStyle() );  
+_SECTION_END(); 
+  
+ 
+//ma1 = MA(C,20); 
+//ema1 = MA(C,5); 
+//Plot(ma1,"MA 20",colorGreen,styleNoRescale); 
+//Plot(ema1,"MA 5",colorRed,styleNoRescale); 
+ 
+//first_high = ValueWhen(TimeNum()==092459,H); 
+//first_low = ValueWhen(TimeNum() ==092459,L); 
+ 
+//Plot(first_high,"First High",colorGreen,styleNoRescale); 
+//Plot(first_low,"First Low",colorRed,styleNoRescale); 
+ 
+//Buy = Cross(ema1,ma1); 
+//Sell = Cross(ma1,ema1); 
+//Short = Sell; 
+//Cover = Buy; 
+ 
+//_SECTION_BEGIN("Buy Sell Arrows"); 
+//PlotShapes(IIf(Buy, shapeSquare, shapeNone),colorGreen,0, L,Offset=-40); 
+//PlotShapes(IIf(Buy, shapeSquare, shapeNone),colorLime,0, L,Offset=-50); 
+//PlotShapes(IIf(Buy, shapeUpArrow, shapeNone),colorWhite,0, L,Offset=-45); 
+//PlotShapes(IIf(Short, shapeSquare, shapeNone),colorRed,0, H,Offset=-40); 
+//PlotShapes(IIf(Short, shapeSquare, shapeNone),colorOrange,0, H,Offset=-50); 
+//PlotShapes(IIf(Short	, shapeDownArrow, shapeNone),colorWhite,0, H,Offset=-45); 
+ 
+//PlotShapes(Sell * shapeStar, colorBrightGreen,0,High, 12); 
+//PlotShapes(Cover * shapeStar, colorRed, 0, Low, -12); 
+//_SECTION_END(); 
+ 
+ 
+SetOption("InitialEquity",500000); 
+SetPositionSize(1*RoundLotSize,spsShares); 
+ 
+//entry_period = Param("Entry Look back days",20,20,40,1); 
+//exit_period = Param("Exit Look back days",10,5,20,1); 
+ 
+//recent_high = Ref(HHV(H,entry_period),-1); 
+//recent_low = Ref(LLV(L,entry_period),-1); 
+ 
+//exit_high = Ref(HHV(H,exit_period),-1); 
+//exit_low = Ref(LLV(L,exit_period),-1); 
+ 
+//Plot(recent_high,"Recent High",colorGreen,styleNoRescale); 
+//Plot(recent_low,"Recent Low",colorRed,styleNoRescale); 
+ 
+//Plot(exit_high,"Exit High",colorGreen,styleDashed); 
+//Plot(exit_low,"Exit Low",colorRed,styleDashed); 
+ 
+//Buy = Cross(C,recent_high); 
+//Sell = Cross(exit_low,L); 
+//Short = Cross(recent_low,C); 
+//Cover = Cross(H,exit_high); 
+ 
+//Buy = ExRem(Buy,Sell); 
+//Sell = ExRem(Sell,Buy); 
+//Short = ExRem(Short,Cover); 
+//Cover = ExRem(Cover,Short); 
+ 
+period = Param("MA period",200,10,50,1); 
+period = Param("EMA period",5,5,20,1); 
+ 
+ma1=MA(C,period); 
+ema1=EMA(C,period); 
+ 
+Plot(ma1,"MA 20",colorGreen,styleNoRescale); 
+Plot(ema1,"EMA 5",colorRed,styleNoRescale); 
+ 
+periods = Param( "Periods", 14, 1, 200, 1 ); 
+z = RSI( periods); 
+ 
+ 
+ 
+ 
+Buy = Cross(ema1,ma1); 
+Sell = Cross(ma1,ema1); 
+Short = Sell; 
+Cover = Buy; 
+ 
+Buy = ExRem(Buy,Sell); 
+Sell = ExRem(Sell,Buy); 
+Short = ExRem(Short,Cover); 
+Cover = ExRem(Cover,Short); 
+ 
+ 
+SetTradeDelays(1,0,1,0); 
+BuyPrice =O; 
+ShortPrice= O; 
+SellPrice= O; 
+CoverPrice =O; 
+ 
+PlotShapes(IIf(Buy, shapeSquare, shapeNone),colorGreen,0, L,Offset=-40); 
+PlotShapes(IIf(Buy, shapeSquare, shapeNone),colorLime,0, L,Offset=-50); 
+PlotShapes(IIf(Buy, shapeUpArrow, shapeNone),colorWhite,0, L,Offset=-45); 
+PlotShapes(IIf(Short, shapeSquare, shapeNone),colorRed,0, H,Offset=-40); 
+PlotShapes(IIf(Short, shapeSquare, shapeNone),colorOrange,0, H,Offset=-50); 
+PlotShapes(IIf(Short	, shapeDownArrow, shapeNone),colorWhite,0, H,Offset=-45); 
+ 
+PlotShapes(Sell * shapeStar, colorBrightGreen,0,High, 12); 
+PlotShapes(Cover * shapeStar, colorRed, 0, Low, -12); 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+</PRE></BODY></HTML>
